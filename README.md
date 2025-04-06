@@ -1,125 +1,128 @@
+
+---
+
 # Noix CLI IDE
 
-Noix CLI IDE é um editor de código interativo baseado em terminal, que oferece recursos essenciais para edição de código e execução de programas em diversas linguagens. Ele suporta múltiplos arquivos abertos, realce de sintaxe e execução de código diretamente do ambiente de desenvolvimento.
+Noix CLI IDE is a terminal-based interactive code editor that offers essential features for code editing and running programs in various languages. It supports multiple open files, syntax highlighting, and code execution directly from the development environment.
 
-## Funcionalidades
+## Features
 
-- **Edição de código com realce de sintaxe:** Suporta diversas linguagens de programação como Python, JavaScript, Java, C, C++, Ruby, PHP, Go, Swift, Kotlin, entre outras.
-- **Abertura e criação de arquivos:** É possível criar novos arquivos ou abrir arquivos existentes diretamente do terminal.
-- **Navegação por arquivos:** Navegue facilmente entre os arquivos abertos utilizando abas.
-- **Edição de código:** Edite seu código com comandos de navegação e modificação padrão de editores de texto (setas, backspace, delete, enter).
-- **Execução de código:** Execute código Python diretamente no editor.
-- **Salvamento de arquivos:** Salve suas alterações com facilidade.
-- **Sistema de atalho de teclado:** Utilize atalhos como `Ctrl+S` para salvar, `F2` para executar, e `F4` para abrir novos arquivos.
+- **Code editing with syntax highlighting:** Supports several programming languages such as Python, JavaScript, Java, C, C++, Ruby, PHP, Go, Swift, Kotlin, among others.
+- **Opening and creating files:** You can create new files or open existing ones directly from the terminal.
+- **File navigation:** Easily switch between open files using tabs.
+- **Code editing:** Edit your code using standard text editor navigation and modification commands (arrows, backspace, delete, enter).
+- **Code execution:** Run Python code directly from the editor.
+- **File saving:** Save your changes effortlessly.
+- **Keyboard shortcut system:** Use shortcuts like `Ctrl+S` to save, `F2` to run, and `F4` to open new files.
 
-## Instalação
+## Installation
 
-Para usar a Noix CLI IDE, basta ter o Python 3 instalado em seu sistema. O código não possui dependências externas, além da biblioteca `curses`, que já vem instalada com a maioria das distribuições do Python.
+To use Noix CLI IDE, all you need is Python 3 installed on your system. The code has no external dependencies other than the `curses` library, which comes pre-installed with most Python distributions.
 
-### Passos para execução:
+### Steps to run:
 
-1. **Clone o repositório** (ou baixe o arquivo):
+1. **Clone the repository** (or download the file):
 
 ```bash
-git clone https://github.com/seu_usuario/noix-cli-ide.git
+git clone https://github.com/pedrolucas7i/noix.git
 ```
 
-2. **Execute o editor**:
+2. **Run the editor**:
 
 ```bash
 python3 main.py
 ```
 
-## Navegação
+## Navigation
 
-- **Setas para cima e para baixo:** Navegue entre os arquivos ou entre linhas no editor.
-- **Setas para a esquerda e direita:** Mova o cursor horizontalmente na linha.
-- **Enter:** Adicione uma nova linha no arquivo.
-- **Ctrl+S:** Salve o arquivo atual.
-- **F2:** Execute o código Python no arquivo atual.
-- **F3:** Salve o arquivo atual.
-- **F4:** Abra um novo arquivo existente.
-- **F5:** Feche o arquivo atual.
-- **Esc:** Feche o editor ou menu.
+- **Up and down arrows:** Navigate between files or between lines in the editor.
+- **Left and right arrows:** Move the cursor horizontally on the line.
+- **Enter:** Add a new line in the file.
+- **Ctrl+S:** Save the current file.
+- **F2:** Run the Python code in the current file.
+- **F3:** Save the current file.
+- **F4:** Open an existing file.
+- **F5:** Close the current file.
+- **Esc:** Exit the editor or menu.
 
-## Como utilizar
+## How to Use
 
-### Abrir um arquivo
+### Open a File
 
-- Ao iniciar a Noix CLI IDE, você verá uma lista de arquivos disponíveis no diretório atual. Use as setas para navegar entre os arquivos e pressione `Enter` para abrir o arquivo desejado.
+- When you launch Noix CLI IDE, you’ll see a list of available files in the current directory. Use the arrow keys to navigate and press `Enter` to open the desired file.
 
-### Criar um novo arquivo
+### Create a New File
 
-- Pressione `n` para criar um novo arquivo. Digite o nome do arquivo e o editor será iniciado para edição.
+- Press `n` to create a new file. Type the file name, and the editor will open for editing.
 
-### Edição de código
+### Code Editing
 
-- Navegue pelas linhas e edite o conteúdo do arquivo.
-- O realce de sintaxe irá destacar palavras-chave de acordo com a linguagem detectada pelo arquivo.
+- Navigate through the lines and edit the file’s content.
+- Syntax highlighting will highlight keywords based on the language detected by the file extension.
 
-### Execução de código
+### Code Execution
 
-- Para executar o código Python, pressione `F2`. O resultado da execução será mostrado na parte superior do terminal.
+- To run Python code, press `F2`. The execution result will appear at the top of the terminal.
 
-### Salvar
+### Saving
 
-- Para salvar as alterações, pressione `Ctrl+S` ou `F3`.
+- To save changes, press `Ctrl+S` or `F3`.
 
-### Fechar arquivos
+### Closing Files
 
-- Para fechar um arquivo, pressione `F5`. Se houver mais de um arquivo aberto, você será levado automaticamente ao próximo arquivo aberto.
+- To close a file, press `F5`. If multiple files are open, you’ll be taken to the next open file automatically.
 
-## Suporte a Linguagens
+## Language Support
 
-A Noix CLI IDE suporta o realce de sintaxe para várias linguagens de programação, incluindo:
+Noix CLI IDE supports syntax highlighting for several programming languages, including:
 
-- Python
-- JavaScript
-- Java
-- C
-- C++
-- Ruby
-- PHP
-- Go
-- Swift
-- Kotlin
-- Scala
-- R
-- Haskell
-- SQL
-- Bash
-- Rust
-- TypeScript
+- Python  
+- JavaScript  
+- Java  
+- C  
+- C++  
+- Ruby  
+- PHP  
+- Go  
+- Swift  
+- Kotlin  
+- Scala  
+- R  
+- Haskell  
+- SQL  
+- Bash  
+- Rust  
+- TypeScript  
 
-### Arquivos Suportados
+### Supported File Extensions
 
-- **.py:** Python
-- **.js:** JavaScript
-- **.java:** Java
-- **.c:** C
-- **.cpp:** C++
-- **.rb:** Ruby
-- **.php:** PHP
-- **.pl:** Perl
-- **.go:** Go
-- **.swift:** Swift
-- **.kt:** Kotlin
-- **.scala:** Scala
-- **.r:** R
-- **.hs:** Haskell
-- **.sql:** SQL
-- **.sh:** Bash
-- **.rs:** Rust
-- **.ts:** TypeScript
+- **.py:** Python  
+- **.js:** JavaScript  
+- **.java:** Java  
+- **.c:** C  
+- **.cpp:** C++  
+- **.rb:** Ruby  
+- **.php:** PHP  
+- **.pl:** Perl  
+- **.go:** Go  
+- **.swift:** Swift  
+- **.kt:** Kotlin  
+- **.scala:** Scala  
+- **.r:** R  
+- **.hs:** Haskell  
+- **.sql:** SQL  
+- **.sh:** Bash  
+- **.rs:** Rust  
+- **.ts:** TypeScript  
 
-## Contribuições
+## Contributions
 
-Se você deseja contribuir com melhorias para o Noix CLI IDE, fique à vontade para abrir um pull request ou enviar uma issue no repositório.
+If you'd like to contribute improvements to Noix CLI IDE, feel free to open a pull request or submit an issue on the repository.
 
-## Licença
+## License
 
-Este projeto está licenciado sob a Licença MIT - veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+This project is licensed under the MIT License – see the [LICENSE](LICENSE) file for details.
 
 ---
 
-Sinta-se à vontade para editar e modificar o Noix CLI IDE conforme suas necessidades!
+Feel free to edit and modify Noix CLI IDE to suit your needs!
