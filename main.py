@@ -35,7 +35,7 @@ def call_editor(file_path):
 
             for i, line in enumerate(editor_content):
                 if i < height - 2:
-                    stdscr.addstr(i + 1, 0, line)
+                    stdscr.addstr(i + 1, 0, line[:width - 1])
 
             if current_line >= len(editor_content):
                 current_line = len(editor_content) - 1
@@ -55,15 +55,18 @@ def call_editor(file_path):
                 output = str(e)
 
             stdscr.clear()
-            stdscr.addstr(0, 0, "Resultado da execução:")
-            stdscr.addstr(2, 0, output)
+            stdscr.addstr(0, 0, "Resultado da execução (pressione qualquer tecla para voltar):")
+            lines = output.splitlines()
+            for i, line in enumerate(lines[:curses.LINES - 2]):
+                stdscr.addstr(i + 2, 0, line[:curses.COLS - 1])
             stdscr.refresh()
             stdscr.getch()
 
         def save_file():
             with open(file_path, 'w') as f:
                 f.write("\n".join(editor_content))
-            stdscr.addstr(0, 0, f"Arquivo {file_path} salvo com sucesso!")
+            height, _ = stdscr.getmaxyx()
+            stdscr.addstr(height - 1, 0, f"Arquivo {file_path} salvo com sucesso! Pressione qualquer tecla...")
             stdscr.refresh()
             stdscr.getch()
 
@@ -88,26 +91,36 @@ def call_editor(file_path):
                 if current_col > 0:
                     current_col -= 1
             elif key == 10:  # Enter
-                editor_content.insert(current_line + 1, "")
+                line = editor_content[current_line]
+                editor_content[current_line] = line[:current_col]
+                editor_content.insert(current_line + 1, line[current_col:])
                 current_line += 1
                 current_col = 0
-            elif key == 127:  # Backspace
+            elif key in (8, 127):  # Backspace
                 if current_col > 0:
                     line = editor_content[current_line]
                     editor_content[current_line] = line[:current_col - 1] + line[current_col:]
                     current_col -= 1
+                elif current_line > 0:
+                    prev_line = editor_content[current_line - 1]
+                    current_line_text = editor_content.pop(current_line)
+                    current_line -= 1
+                    current_col = len(prev_line)
+                    editor_content[current_line] = prev_line + current_line_text
             elif key == curses.KEY_DC:  # Delete
-                if current_col < len(editor_content[current_line]):
-                    line = editor_content[current_line]
+                line = editor_content[current_line]
+                if current_col < len(line):
                     editor_content[current_line] = line[:current_col] + line[current_col + 1:]
+                elif current_line < len(editor_content) - 1:
+                    editor_content[current_line] += editor_content.pop(current_line + 1)
             elif key == 9:  # Tab
                 editor_content[current_line] = editor_content[current_line][:current_col] + "    " + editor_content[current_line][current_col:]
                 current_col += 4
-            elif key == 337:  # F2
+            elif key == curses.KEY_F2:
                 run_code()
-            elif key == 338:  # F3
+            elif key == curses.KEY_F3:
                 save_file()
-            elif 32 <= key <= 126:  # Printable characters
+            elif 32 <= key <= 126:
                 line = editor_content[current_line]
                 editor_content[current_line] = line[:current_col] + chr(key) + line[current_col:]
                 current_col += 1
