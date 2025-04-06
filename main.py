@@ -58,7 +58,8 @@ def get_files():
 def load_file(file_path):
     try:
         with open(file_path, 'r') as f:
-            return [line.rstrip('\n') for line in f.readlines()]
+            lines = [line.rstrip('\n') for line in f.readlines()]
+            return lines if lines else [""]
     except FileNotFoundError:
         return [""]
 
