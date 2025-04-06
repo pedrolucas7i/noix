@@ -3,14 +3,54 @@ import subprocess
 import os
 import re
 
-# Expressão regular para identificar palavras-chave do Python
 PYTHON_KEYWORDS = r'\b(def|import|for|while|if|else|elif|return|class|try|except|finally|with|as|pass|break|continue|lambda|yield|from|global|nonlocal|assert|del|raise)\b'
+JAVASCRIPT_KEYWORDS = r'\b(function|var|let|const|if|else|for|while|do|switch|case|break|continue|return|try|catch|finally|throw|class|extends|super|import|export|default|new|this|typeof|instanceof|in|of)\b'
+JAVA_KEYWORDS = r'\b(public|private|protected|class|interface|enum|if|else|switch|case|default|for|while|do|break|continue|return|try|catch|finally|throw|throws|new|this|super|import|package|static|final|abstract|synchronized|volatile|transient|native|strictfp|instanceof)\b'
+C_KEYWORDS = r'\b(auto|break|case|char|const|continue|default|do|double|else|enum|extern|float|for|goto|if|int|long|register|return|short|signed|sizeof|static|struct|switch|typedef|union|unsigned|void|volatile|while)\b'
+CPP_KEYWORDS = r'\b(asm|bool|catch|class|const_cast|delete|dynamic_cast|explicit|export|false|friend|inline|mutable|namespace|new|operator|private|protected|public|reinterpret_cast|static_cast|template|this|throw|true|try|typeid|typename|using|virtual)\b'
+RUBY_KEYWORDS = r'\b(def|class|module|if|unless|else|elsif|case|when|while|until|for|break|next|redo|retry|return|yield|begin|rescue|ensure|end|and|or|not|in)\b'
+PHP_KEYWORDS = r'\b(<?php|echo|print|if|else|elseif|endif|for|foreach|while|do|switch|case|break|continue|function|class|interface|trait|extends|implements|public|protected|private|static|var|const|global|new|try|catch|finally|throw|namespace|use|require|include)\b'
+PERL_KEYWORDS = r'\b(sub|if|else|elsif|while|for|foreach|unless|package|use|my|our|local|print|return|next|last|redo|goto|eval)\b'
+GO_KEYWORDS = r'\b(func|package|import|if|else|for|range|switch|case|default|return|break|continue|go|select|struct|interface|map|chan|defer)\b'
+SWIFT_KEYWORDS = r'\b(func|import|class|struct|enum|protocol|extension|if|else|switch|case|default|for|while|repeat|return|break|continue|guard|defer|do|try|catch|throw)\b'
+KOTLIN_KEYWORDS = r'\b(fun|val|var|if|else|when|try|catch|finally|for|while|do|return|class|object|interface|in|is|as|null|this|super|import|package)\b'
+SCALA_KEYWORDS = r'\b(def|val|var|if|else|while|for|yield|match|case|class|object|trait|extends|with|new|throw|try|catch|finally|return|import|package)\b'
+R_KEYWORDS = r'\b(function|if|else|for|while|repeat|in|next|break|return)\b'
+HASKELL_KEYWORDS = r'\b(module|import|where|let|in|data|newtype|type|class|instance|deriving|if|then|else|case|of)\b'
+SQL_KEYWORDS = r'\b(SELECT|INSERT|UPDATE|DELETE|FROM|WHERE|JOIN|INNER|LEFT|RIGHT|FULL|ON|GROUP|BY|ORDER|HAVING|AS|DISTINCT|CREATE|DROP|ALTER|TABLE|DATABASE|VIEW|INDEX|TRIGGER|PROCEDURE|FUNCTION|UNION|ALL|NULL|NOT|IN|LIKE|IS|BETWEEN)\b'
+BASH_KEYWORDS = r'\b(if|then|else|elif|fi|case|esac|for|while|until|do|done|function)\b'
+RUST_KEYWORDS = r'\b(fn|let|mut|if|else|match|while|loop|for|in|break|continue|return|pub|crate|mod|use|impl|trait|struct|enum|const|static|unsafe|as|ref|type|where|move)\b'
+TYPESCRIPT_KEYWORDS = r'\b(function|var|let|const|if|else|for|while|do|switch|case|break|continue|return|try|catch|finally|throw|class|extends|super|import|export|default|interface|type|enum|namespace|module)\b'
+
+EXTENSION_REGEX = {
+    '.py': re.compile(PYTHON_KEYWORDS),
+    '.js': re.compile(JAVASCRIPT_KEYWORDS),
+    '.java': re.compile(JAVA_KEYWORDS),
+    '.c': re.compile(C_KEYWORDS),
+    '.cpp': re.compile(CPP_KEYWORDS),
+    '.rb': re.compile(RUBY_KEYWORDS),
+    '.php': re.compile(PHP_KEYWORDS),
+    '.pl': re.compile(PERL_KEYWORDS),
+    '.go': re.compile(GO_KEYWORDS),
+    '.swift': re.compile(SWIFT_KEYWORDS),
+    '.kt': re.compile(KOTLIN_KEYWORDS),
+    '.scala': re.compile(SCALA_KEYWORDS),
+    '.r': re.compile(R_KEYWORDS),
+    '.hs': re.compile(HASKELL_KEYWORDS),
+    '.sql': re.compile(SQL_KEYWORDS, re.IGNORECASE),
+    '.sh': re.compile(BASH_KEYWORDS),
+    '.rs': re.compile(RUST_KEYWORDS),
+    '.ts': re.compile(TYPESCRIPT_KEYWORDS)
+}
+
+def get_regex_for_file(file_path):
+    _, ext = os.path.splitext(file_path)
+    return EXTENSION_REGEX.get(ext.lower(), re.compile(PYTHON_KEYWORDS))
 
 def get_files():
-    resultado = subprocess.run(["ls", "-a"], capture_output=True, text=True)
-    if resultado.returncode == 0:
-        files = resultado.stdout.strip().split('\n')
-        return [f for f in files if f not in ('.', '..')]
+    resultado = os.listdir('.')
+    if resultado != None:
+        return [f for f in resultado if f not in ('.', '..') and os.path.isfile(os.path.join(os.getcwd(), f))]
     else:
         return []
 
@@ -26,7 +66,6 @@ def save_file_content(file_path, editor_content):
         f.write("\n".join(editor_content))
 
 def open_file_selection(stdscr):
-    # Menu simples para seleção de arquivo
     selection = 0
     files = get_files()
     while True:
@@ -56,32 +95,31 @@ def open_file_selection(stdscr):
 
 def call_editor(initial_file):
     def run_ide(stdscr):
-        # Inicialização das cores para realce de sintaxe e barra de abas
         curses.start_color()
         curses.use_default_colors()
-        curses.init_pair(1, curses.COLOR_YELLOW, -1)  # Realce para palavras-chave
-        curses.init_pair(2, curses.COLOR_CYAN, -1)    # Destaque para a aba ativa
+        curses.init_pair(1, curses.COLOR_YELLOW, -1)
+        curses.init_pair(2, curses.COLOR_CYAN, -1)
 
         curses.curs_set(1)
         stdscr.clear()
         stdscr.refresh()
 
-        # Lista de arquivos abertos – cada item é um dicionário com o conteúdo, caminho e posição do cursor
         open_files = []
         open_files.append({
             "file_path": initial_file,
             "editor_content": load_file(initial_file),
             "cursor_line": 0,
-            "cursor_col": 0
+            "cursor_col": 0,
+            "regex": get_regex_for_file(initial_file)
         })
         active_file = 0
         scroll_offset = 0
 
-        def syntax_highlight(line):
-            """Divide a linha em segmentos com ou sem realce."""
+        def syntax_highlight(line, regex):
+            """Divide a linha em segmentos com ou sem realce, usando o regex fornecido."""
             segments = []
             last_index = 0
-            for match in re.finditer(PYTHON_KEYWORDS, line):
+            for match in regex.finditer(line):
                 start, end = match.span()
                 if start > last_index:
                     segments.append((line[last_index:start], curses.A_NORMAL))
@@ -112,25 +150,23 @@ def call_editor(initial_file):
             editor_content = current_file["editor_content"]
             cursor_line = current_file["cursor_line"]
             cursor_col = current_file["cursor_col"]
+            regex = current_file["regex"]
 
-            # Barra de status na última linha
             status_bar = ("F2: Executar | F3: Salvar | F4: Abrir arquivo | "
                           "F5: Fechar arquivo | Ctrl+S: Salvar | Ctrl+Q: Sair")
             stdscr.addstr(height - 1, 0, status_bar[:width-1])
 
-            # Renderização das linhas (da linha 1 até a penúltima)
             for i in range(1, height - 1):
                 line_index = i - 1 + scroll_offset
                 if line_index < len(editor_content):
                     line = editor_content[line_index]
                     x = 0
-                    for segment, attr in syntax_highlight(line):
+                    for segment, attr in syntax_highlight(line, regex):
                         try:
                             stdscr.addstr(i, x, segment[:width - x], attr)
                         except curses.error:
                             pass
                         x += len(segment)
-            # Ajusta o scroll se o cursor sair da área visível
             if cursor_line < scroll_offset:
                 new_scroll = cursor_line
             elif cursor_line >= scroll_offset + height - 2:
@@ -139,7 +175,6 @@ def call_editor(initial_file):
                 new_scroll = scroll_offset
             scroll_offset = new_scroll
 
-            # Move o cursor para a posição correta na tela
             disp_line = current_file["cursor_line"] - scroll_offset + 1
             disp_col = current_file["cursor_col"]
             stdscr.move(disp_line, disp_col)
@@ -181,10 +216,8 @@ def call_editor(initial_file):
             key = stdscr.getch()
             current_file = open_files[active_file]
 
-            # ESC ou Ctrl+Q para sair
             if key == 27 or key == (ord('q') & 0x1f):
                 running = False
-            # Ctrl+S para salvar
             elif key == (ord('s') & 0x1f):
                 save_current_file()
             elif key == curses.KEY_DOWN:
@@ -207,7 +240,7 @@ def call_editor(initial_file):
             elif key == curses.KEY_LEFT:
                 if current_file["cursor_col"] > 0:
                     current_file["cursor_col"] -= 1
-            elif key == 10:  # Enter
+            elif key == 10:
                 line = current_file["editor_content"][current_file["cursor_line"]]
                 before = line[:current_file["cursor_col"]]
                 after = line[current_file["cursor_col"]:]
@@ -247,18 +280,17 @@ def call_editor(initial_file):
             elif key == curses.KEY_F3:
                 save_current_file()
             elif key == curses.KEY_F4:
-                # Abre um novo arquivo e adiciona como aba
                 new_file = open_file_selection(stdscr)
                 if new_file:
                     open_files.append({
                         "file_path": new_file,
                         "editor_content": load_file(new_file),
                         "cursor_line": 0,
-                        "cursor_col": 0
+                        "cursor_col": 0,
+                        "regex": get_regex_for_file(new_file)
                     })
                     active_file = len(open_files) - 1
             elif key == curses.KEY_F5:
-                # Fecha a aba atual se houver mais de uma aberta
                 if len(open_files) > 1:
                     open_files.pop(active_file)
                     active_file = max(0, active_file - 1)
@@ -308,5 +340,4 @@ def main_menu(stdscr):
         elif key == 27:
             break
 
-# Inicia o programa
 curses.wrapper(main_menu)
