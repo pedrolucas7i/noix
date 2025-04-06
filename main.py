@@ -215,7 +215,7 @@ def call_editor(initial_file):
                 current_file["editor_content"].insert(current_file["cursor_line"] + 1, after)
                 current_file["cursor_line"] += 1
                 current_file["cursor_col"] = 0
-            elif key in (8, 127):  # Backspace
+            elif key == curses.KEY_BACKSPACE:  # Backspace
                 if current_file["cursor_col"] > 0:
                     line = current_file["editor_content"][current_file["cursor_line"]]
                     current_file["editor_content"][current_file["cursor_line"]] = (
