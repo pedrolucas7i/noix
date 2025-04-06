@@ -3,6 +3,7 @@ import subprocess
 import os
 import re
 
+# Expressões regulares para diversas linguagens
 PYTHON_KEYWORDS = r'\b(def|import|for|while|if|else|elif|return|class|try|except|finally|with|as|pass|break|continue|lambda|yield|from|global|nonlocal|assert|del|raise)\b'
 JAVASCRIPT_KEYWORDS = r'\b(function|var|let|const|if|else|for|while|do|switch|case|break|continue|return|try|catch|finally|throw|class|extends|super|import|export|default|new|this|typeof|instanceof|in|of)\b'
 JAVA_KEYWORDS = r'\b(public|private|protected|class|interface|enum|if|else|switch|case|default|for|while|do|break|continue|return|try|catch|finally|throw|throws|new|this|super|import|package|static|final|abstract|synchronized|volatile|transient|native|strictfp|instanceof)\b'
@@ -22,6 +23,7 @@ BASH_KEYWORDS = r'\b(if|then|else|elif|fi|case|esac|for|while|until|do|done|func
 RUST_KEYWORDS = r'\b(fn|let|mut|if|else|match|while|loop|for|in|break|continue|return|pub|crate|mod|use|impl|trait|struct|enum|const|static|unsafe|as|ref|type|where|move)\b'
 TYPESCRIPT_KEYWORDS = r'\b(function|var|let|const|if|else|for|while|do|switch|case|break|continue|return|try|catch|finally|throw|class|extends|super|import|export|default|interface|type|enum|namespace|module)\b'
 
+# Mapeamento de extensões para padrões de realce (já compilados)
 EXTENSION_REGEX = {
     '.py': re.compile(PYTHON_KEYWORDS),
     '.js': re.compile(JAVASCRIPT_KEYWORDS),
@@ -43,16 +45,15 @@ EXTENSION_REGEX = {
     '.ts': re.compile(TYPESCRIPT_KEYWORDS)
 }
 
+# Função para obter o regex conforme a extensão do arquivo
 def get_regex_for_file(file_path):
     _, ext = os.path.splitext(file_path)
     return EXTENSION_REGEX.get(ext.lower(), re.compile(PYTHON_KEYWORDS))
 
+# Retorna apenas os arquivos (não inclui diretórios)
 def get_files():
-    resultado = os.listdir('.')
-    if resultado != None:
-        return [f for f in resultado if f not in ('.', '..') and os.path.isfile(os.path.join(os.getcwd(), f))]
-    else:
-        return []
+    all_items = os.listdir('.')
+    return [f for f in all_items if os.path.isfile(os.path.join(os.getcwd(), f))]
 
 def load_file(file_path):
     try:
@@ -65,7 +66,24 @@ def save_file_content(file_path, editor_content):
     with open(file_path, 'w') as f:
         f.write("\n".join(editor_content))
 
+def create_new_file(stdscr):
+    stdscr.clear()
+    stdscr.addstr(0, 0, "Digite o nome do novo arquivo: ")
+    curses.echo()
+    file_name = stdscr.getstr(1, 0, 60).decode('utf-8').strip()
+    curses.noecho()
+    if file_name:
+        if os.path.exists(file_name):
+            stdscr.addstr(3, 0, "Arquivo já existe. Pressione qualquer tecla para continuar.")
+            stdscr.getch()
+        else:
+            with open(file_name, 'w') as f:
+                f.write("")  # Cria um arquivo vazio
+        return file_name
+    return None
+
 def open_file_selection(stdscr):
+    # Menu simples para seleção de arquivo
     selection = 0
     files = get_files()
     while True:
@@ -95,15 +113,17 @@ def open_file_selection(stdscr):
 
 def call_editor(initial_file):
     def run_ide(stdscr):
+        # Inicialização das cores para realce de sintaxe e barra de abas
         curses.start_color()
         curses.use_default_colors()
-        curses.init_pair(1, curses.COLOR_YELLOW, -1)
-        curses.init_pair(2, curses.COLOR_CYAN, -1)
+        curses.init_pair(1, curses.COLOR_YELLOW, -1)  # Realce para palavras-chave
+        curses.init_pair(2, curses.COLOR_CYAN, -1)    # Destaque para a aba ativa
 
         curses.curs_set(1)
         stdscr.clear()
         stdscr.refresh()
 
+        # Lista de arquivos abertos – cada item é um dicionário com conteúdo, caminho, posição do cursor e regex
         open_files = []
         open_files.append({
             "file_path": initial_file,
@@ -152,10 +172,12 @@ def call_editor(initial_file):
             cursor_col = current_file["cursor_col"]
             regex = current_file["regex"]
 
+            # Barra de status na última linha
             status_bar = ("F2: Executar | F3: Salvar | F4: Abrir arquivo | "
                           "F5: Fechar arquivo | Ctrl+S: Salvar | Ctrl+Q: Sair")
             stdscr.addstr(height - 1, 0, status_bar[:width-1])
 
+            # Renderização das linhas (da linha 1 até a penúltima)
             for i in range(1, height - 1):
                 line_index = i - 1 + scroll_offset
                 if line_index < len(editor_content):
@@ -167,6 +189,7 @@ def call_editor(initial_file):
                         except curses.error:
                             pass
                         x += len(segment)
+            # Ajusta o scroll se o cursor sair da área visível
             if cursor_line < scroll_offset:
                 new_scroll = cursor_line
             elif cursor_line >= scroll_offset + height - 2:
@@ -175,6 +198,7 @@ def call_editor(initial_file):
                 new_scroll = scroll_offset
             scroll_offset = new_scroll
 
+            # Move o cursor para a posição correta na tela
             disp_line = current_file["cursor_line"] - scroll_offset + 1
             disp_col = current_file["cursor_col"]
             stdscr.move(disp_line, disp_col)
@@ -216,8 +240,10 @@ def call_editor(initial_file):
             key = stdscr.getch()
             current_file = open_files[active_file]
 
+            # ESC ou Ctrl+Q para sair
             if key == 27 or key == (ord('q') & 0x1f):
                 running = False
+            # Ctrl+S para salvar
             elif key == (ord('s') & 0x1f):
                 save_current_file()
             elif key == curses.KEY_DOWN:
@@ -240,7 +266,7 @@ def call_editor(initial_file):
             elif key == curses.KEY_LEFT:
                 if current_file["cursor_col"] > 0:
                     current_file["cursor_col"] -= 1
-            elif key == 10:
+            elif key == 10:  # Enter
                 line = current_file["editor_content"][current_file["cursor_line"]]
                 before = line[:current_file["cursor_col"]]
                 after = line[current_file["cursor_col"]:]
@@ -248,7 +274,7 @@ def call_editor(initial_file):
                 current_file["editor_content"].insert(current_file["cursor_line"] + 1, after)
                 current_file["cursor_line"] += 1
                 current_file["cursor_col"] = 0
-            elif key == curses.KEY_BACKSPACE:  # Backspace
+            elif key == curses.KEY_BACKSPACE:
                 if current_file["cursor_col"] > 0:
                     line = current_file["editor_content"][current_file["cursor_line"]]
                     current_file["editor_content"][current_file["cursor_line"]] = (
@@ -261,7 +287,7 @@ def call_editor(initial_file):
                     current_file["cursor_line"] -= 1
                     current_file["cursor_col"] = len(prev_line)
                     current_file["editor_content"][current_file["cursor_line"]] = prev_line + curr_line_text
-            elif key == curses.KEY_DC:  # Delete
+            elif key == curses.KEY_DC:
                 line = current_file["editor_content"][current_file["cursor_line"]]
                 if current_file["cursor_col"] < len(line):
                     current_file["editor_content"][current_file["cursor_line"]] = (
@@ -311,15 +337,17 @@ def main_menu(stdscr):
 
     while True:
         stdscr.clear()
-        stdscr.addstr(0, 0, "Selecione um arquivo para editar (ENTER) - ESC para sair")
+        stdscr.addstr(0, 0, "Selecione um arquivo para editar ou crie um novo (ENTER para abrir, 'n' para novo, ESC para sair)")
         files = get_files()
-        if not files:
+        # Adiciona a opção "<Novo arquivo>" ao final do menu
+        menu_items = files + ["<Novo arquivo>"]
+        if not menu_items:
             stdscr.addstr(2, 2, "Nenhum arquivo encontrado.")
             stdscr.refresh()
             stdscr.getch()
             return
 
-        for i, name in enumerate(files):
+        for i, name in enumerate(menu_items):
             if i == selection:
                 stdscr.attron(curses.A_REVERSE)
                 stdscr.addstr(i + 2, 2, name)
@@ -331,13 +359,23 @@ def main_menu(stdscr):
 
         if key == curses.KEY_UP and selection > 0:
             selection -= 1
-        elif key == curses.KEY_DOWN and selection < len(files) - 1:
+        elif key == curses.KEY_DOWN and selection < len(menu_items) - 1:
             selection += 1
         elif key in [10, 13]:
-            file_path = files[selection]
-            call_editor(file_path)
+            selected_item = menu_items[selection]
+            if selected_item == "<Novo arquivo>":
+                new_file = create_new_file(stdscr)
+                if new_file:
+                    call_editor(new_file)
+            else:
+                call_editor(selected_item)
             stdscr.clear()
+        elif key == ord('n'):
+            new_file = create_new_file(stdscr)
+            if new_file:
+                call_editor(new_file)
         elif key == 27:
             break
 
+# Inicia o programa
 curses.wrapper(main_menu)
